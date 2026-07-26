@@ -14,7 +14,7 @@ resource "aws_s3_bucket" "terraform_state" {
 module "vpc" {
   source = "./module/vpc"
 
-  region               = var.aws_region
+  #region               = var.aws_region
   vpc_cidr             = var.vpc_cidr
   availability_zones   = var.availability_zones   # List of availability zones to distribute subnets across
   public_subnets_cidr  = var.public_subnets_cidr  # CIDR blocks for public subnets
