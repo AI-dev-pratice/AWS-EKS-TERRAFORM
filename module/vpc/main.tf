@@ -50,7 +50,6 @@ resource "aws_internet_gateway" "eks-igw" {
 #elastic ip for nat gateway
 resource "aws_eip" "eks-nat-eip" {
   count = length(var.public_subnets_cidr)
-  vpc   = true
 
   tags = {
     Name        = "${var.eks_cluster_name}-nat-eip-${count.index + 1}"
@@ -94,7 +93,7 @@ resource "aws_route_table" "eks-private-rt" {
   vpc_id = aws_vpc.eks-vpc.id
   route {
     cidr_block     = "0.0.0.0/0"
-    nat_gateway_id = aws_nat_gateway.eks-nat-gateway.id
+    nat_gateway_id = aws_nat_gateway.eks-nat-gateway[count.index].id
   }
   tags = {
     Name        = "${var.eks_cluster_name}-private-rt-${count.index + 1}"
