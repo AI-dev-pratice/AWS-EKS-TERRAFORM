@@ -27,8 +27,10 @@ node_groups = {
   dev = {
     instance_types = ["t2.micro"]
     capacity_type  = "ON_DEMAND"
-    desired_size   = 2
-    min_size       = 1
-    max_size       = 3
+    scaling_config = {
+      desired_size = 2
+      min_size     = 1
+      max_size     = 3
+    }
   }
 }
