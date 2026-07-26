@@ -21,7 +21,7 @@ availability_zones = [
 ]
 
 eks_cluster_name = "amazon-dev-eks-cluster"
-cluster_version = "1.31"
+cluster_version  = "1.31"
 
 node_groups = {
   dev = {

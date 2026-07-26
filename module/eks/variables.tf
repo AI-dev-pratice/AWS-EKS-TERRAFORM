@@ -1,25 +1,25 @@
 variable "region" {
   description = "AWS region"
-  type = string
-  default = "ap-south-1"
+  type        = string
+  default     = "ap-south-1"
 
 }
 
 variable "vpc_id" {
   description = "VPC ID"
-  type = string
+  type        = string
 }
 
 #subnet IDs for the EKS cluster
 variable "subnet_id" {
   description = "Public Subnet IDs"
-  type = list(string)
+  type        = list(string)
 }
 
 #eks clluster name
 variable "eks_cluster_name" {
   description = "EKS Cluster Name"
-  type = string
+  type        = string
 }
 
 variable "cluster_version" {
