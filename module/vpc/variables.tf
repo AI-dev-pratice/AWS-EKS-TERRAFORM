@@ -3,6 +3,12 @@ variable "vpc_cidr" {
   type        = string
 }
 
+variable "region" {
+  description = "AWS region"
+  type        = string
+  default     = "ap-south-1"
+}
+
 variable "public_subnets_cidr" {
   description = "The CIDR blocks for the public subnets"
   type        = list(string)
