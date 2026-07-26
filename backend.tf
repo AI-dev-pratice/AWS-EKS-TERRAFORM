@@ -1,26 +1,18 @@
-# resource "aws_s3_bucket" "terraform_state_bucket" {
-#   bucket = "terraform-aws-tf-state-bucket-eks-1"
-
-#   lifecycle {
-#     prevent_destroy = true
-#   }
-#  }
-
-
-# Project 1 — EKS infrastructure
 terraform {
+  required_version = ">= 1.1"  # use_lockfile requires 1.1+
+  
   backend "s3" {
     bucket         = "terraform-aws-tf-state-bucket-733717814172"
     key            = "dev/eks/terraform.tfstate"
     region         = "ap-south-1"
-    use_lockfile   = true
     encrypt        = true
+    dynamodb_table = "terraform-locks"  # Optional: for state locking
   }
 
-required_providers {
-  aws = {
-    source  = "hashicorp/aws"
-    version = "~> 6.0.0"
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 6.0.0"
+    }
   }
-}
 }
