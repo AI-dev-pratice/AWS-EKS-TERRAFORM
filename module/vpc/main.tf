@@ -49,19 +49,20 @@ resource "aws_internet_gateway" "eks-igw" {
 
 #elastic ip for nat gateway
 resource "aws_eip" "eks-nat-eip" {
-    vpc = true
-    
-    tags = {
-        Name = "${var.eks_cluster_name}-nat-eip"
-        Project = "EKS"
-        Environment = "dev"
-    }
-    }
+  count = length(var.public_subnets_cidr)
+  vpc   = true
+
+  tags = {
+    Name        = "${var.eks_cluster_name}-nat-eip-${count.index + 1}"
+    Project     = "EKS"
+    Environment = "dev"
+  }
+}
 
 #NAT Gateway
 resource "aws_nat_gateway" "eks-nat-gateway" {
- count = length(var.public_subnets_cidr)
- allocation_id = aws_eip.eks-nat-eip.id
+  count         = length(var.public_subnets_cidr)
+  allocation_id = aws_eip.eks-nat-eip[count.index].id
   subnet_id     = element(aws_subnet.eks-public-subnet.*.id, count.index)
 
   tags = {
@@ -69,15 +70,16 @@ resource "aws_nat_gateway" "eks-nat-gateway" {
     Project = "EKS"
     Environment = "dev"
   }
+}
 
-  #Route Table for Public Subnets
+#Route Table for Public Subnets
 resource "aws_route_table" "eks-public-rt" {
-  count = length(var.private_subnets_cidr)
+  count = length(var.public_subnets_cidr)
   vpc_id = aws_vpc.eks-vpc.id
 
   route {
     cidr_block = "0.0.0.0/0"
-    gateway_id = aws_internet_gateway.eks-igw.id 
+    gateway_id = aws_internet_gateway.eks-igw.id
   }
   tags = {
     Name = "${var.eks_cluster_name}-public-rt-${count.index + 1}"
@@ -87,32 +89,32 @@ resource "aws_route_table" "eks-public-rt" {
 }
 
 #private route table for private subnets
-resource "aws_private_route_table" "eks-private-rt" {
+resource "aws_route_table" "eks-private-rt" {
   count = length(var.private_subnets_cidr)
   vpc_id = aws_vpc.eks-vpc.id
   route {
     cidr_block     = "0.0.0.0/0"
     nat_gateway_id = aws_nat_gateway.eks-nat-gateway.id
   }
-    tags = {
-        Name = "${var.eks_cluster_name}-private-rt-${count.index + 1}"
-        Project = "EKS"
-        Environment = "dev"
-    }
+  tags = {
+    Name = "${var.eks_cluster_name}-private-rt-${count.index + 1}"
+    Project = "EKS"
+    Environment = "dev"
+  }
 }
 
 #Route Table Association for Public Subnets
 resource "aws_route_table_association" "eks-public-rt-assoc" {
   count          = length(var.public_subnets_cidr)
   subnet_id      = element(aws_subnet.eks-public-subnet.*.id, count.index)
-  route_table_id = aws_route_table.eks-public-rt.id
+  route_table_id = aws_route_table.eks-public-rt[count.index].id
 }
 
 #Route Table Association for Private Subnets
 resource "aws_route_table_association" "eks-private-rt-assoc" {
   count          = length(var.private_subnets_cidr)
   subnet_id      = element(aws_subnet.eks-private-subnet.*.id, count.index)
-  route_table_id = aws_private_route_table.eks-private-rt.id
+  route_table_id = aws_route_table.eks-private-rt[count.index].id
 }
 
 

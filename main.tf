@@ -1,15 +1,5 @@
-terraform {
-  required_providers {
-    aws = {
-      source = "hashicorp/aws"
-      version = "5.97.0"
-    }
-  }
-}
-
-
 provider "aws" {
-  region = "us-east-1"
+  region = var.aws_region
 }
 
 
@@ -21,35 +11,22 @@ resource "aws_s3_bucket" "terraform_state" {
   }
 }
 
-
-terraform {  
-  backend "s3" {  
-    bucket       = "terraform-aws-tf-state-bucket-733717814172"  
-    key          = "Add-path-of-terraform-state-file"
-    region       = "us-east-1"  
-    encrypt      = true  
-    use_lockfile = true  #S3 native locking
-  }  
-}
-
-
-
 module "vpc" {
-  source = "./modules/vpc"
+  source = "./module/vpc"
 
-  region              = var.region
-  vpc_cidr            = var.vpc_cidr
-  availability_zones  = var.availability_zones  # List of availability zones to distribute subnets across
-  private_subnet_cidr = var.private_subnet_cidr # CIDR blocks for private subnets
-  public_subnet_cidr  = var.public_subnet_cidr  # CIDR blocks for public subnets
-  eks_cluster_name    = var.eks_cluster_name    # Optional: used inside VPC module for tagging or naming
+  region               = var.aws_region
+  vpc_cidr             = var.vpc_cidr
+  availability_zones   = var.availability_zones  # List of availability zones to distribute subnets across
+  public_subnets_cidr  = var.public_subnets_cidr  # CIDR blocks for public subnets
+  private_subnets_cidr = var.private_subnets_cidr # CIDR blocks for private subnets
+  eks_cluster_name     = var.eks_cluster_name    # Optional: used inside VPC module for tagging or naming
 }
 
 
 module "eks" {
-  source = "./modules/eks"
+  source = "./module/eks"
 
-  region           = var.region
+  region           = var.aws_region
   eks_cluster_name = var.eks_cluster_name         # Name of the EKS cluster to create
   cluster_version  = var.cluster_version          # Kubernetes version for the EKS control plane
   vpc_id           = module.vpc.vpc_id            # Use VPC ID output from the VPC module

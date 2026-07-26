@@ -2,7 +2,7 @@
 
 resource "aws_iam_role" "eks-cluster-role" {
 
-  name = "${define-cluster_name}-eks-cluster-role"
+  name = "${var.eks_cluster_name}-eks-cluster-role"
 
 
 
@@ -33,7 +33,7 @@ resource "aws_iam_role" "eks-cluster-role" {
 
 resource "aws_iam_role_policy_attachment" "cluster_policy" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
-  role       = define-cluster-role.name
+  role       = aws_iam_role.eks-cluster-role.name
 }
 
 
@@ -41,8 +41,8 @@ resource "aws_iam_role_policy_attachment" "cluster_policy" {
 # Create EKS Cluster
 
 resource "aws_eks_cluster" "main-eks-cluster" {
-  name     = 
-  version  = 
+  name     = var.eks_cluster_name
+  version  = var.cluster_version
   role_arn = aws_iam_role.eks-cluster-role.arn
 
   vpc_config {
@@ -59,7 +59,7 @@ resource "aws_eks_cluster" "main-eks-cluster" {
 # IAM Role for Worker Nodes
 
 resource "aws_iam_role" "eks_node_role" {
-  name = "${define-eks-cluster-name}-node-role"
+  name = "${var.eks_cluster_name}-node-role"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -93,7 +93,7 @@ resource "aws_iam_role_policy_attachment" "eks_node_policy" {
 resource "aws_eks_node_group" "eks-worker-node" {
   for_each = var.node_groups
 
-  cluster_name    = Add-cluster-name.name
+  cluster_name    = var.eks_cluster_name
   node_group_name = each.key
   node_role_arn   = aws_iam_role.eks_node_role.arn
   subnet_ids      = var.subnet_id

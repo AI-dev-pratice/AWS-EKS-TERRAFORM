@@ -22,19 +22,21 @@ variable "eks_cluster_name" {
   type = string
 }
 
-#node group name
-variable "node_group_name" {    
-    
-  description = "EKS Node Group Name"
-  type = map(
-    object({
-      instance_type = string
-      capacity_type = string
+variable "cluster_version" {
+  description = "EKS Kubernetes version"
+  type        = string
+  default     = "1.29"
+}
 
-     scaling_config = object({
-     desired_size = number  
-      min_size = number
-      max_size = number
+variable "node_groups" {
+  description = "Map of EKS node group configurations"
+  type = map(object({
+    instance_types = list(string)
+    capacity_type  = string
+    scaling_config = object({
+      desired_size = number
+      min_size     = number
+      max_size     = number
     })
-  )
+  }))
 }
